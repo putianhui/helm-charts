@@ -13,6 +13,6 @@ entries:
       name: putianhui
     name: yapi
     urls:
-    - https://github.com/putianhui/helm-charts/yapi-0.0.1.tgz
+    - https://putianhui.github.io/helm-charts/yapi-0.0.1.tgz
     version: 0.0.1
 generated: "2021-07-07T18:38:09.912083+08:00"
