@@ -1,0 +1,101 @@
+﻿apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "yapi.fullname" . }}
+  labels:
+{{ include "yapi.labels" . | indent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+{{ include "yapi.labels" . | indent 6 }}
+  serviceName: {{ include "yapi.fullname" . }}-svc
+  {{- if .Values.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ include "yapi.fullname" . }}-data
+      labels:
+        app.kubernetes.io/instance: mogo-data
+    spec:
+      accessModes: [{{ .Values.persistence.accessMode | quote }}]
+      storageClassName: "{{ .Values.persistence.storageClassName }}"
+      resources:
+        requests:
+          storage: {{ .Values.persistence.size | quote }}
+  {{- end }}
+  template:
+    metadata:
+      labels:
+{{ include "yapi.labels" . | indent 10 }}
+    spec:
+    {{- with .Values.image.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+    {{- end }}
+      volumes:
+      {{- if not .Values.persistence.enabled }}
+      - name: data
+        emptyDir: {}
+      {{- end }}
+      containers:
+        - name: mongodb
+          volumeMounts:
+          - name: {{ include "yapi.fullname" . }}-data
+            mountPath: /data/db/
+          image: mongo:4.2.1
+          ports:
+            - name: mongodb
+              containerPort: 27017
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+          - name: MONGO_INITDB_ROOT_USERNAME
+            value: "{{ .Values.env.mongodb.MONGO_INITDB_ROOT_USERNAME }}"
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            value: "{{ .Values.env.mongodb.MONGO_INITDB_ROOT_PASSWORD }}"
+        - name: yapi
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - name: yapi
+              containerPort: 3000
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+          - name: MONGO_INITDB_ROOT_USERNAME
+            value: "{{ .Values.env.mongodb.MONGO_INITDB_ROOT_USERNAME }}"
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            value: "{{ .Values.env.mongodb.MONGO_INITDB_ROOT_PASSWORD }}"
+          - name: YAPI_ADMIN_ACCOUNT
+            value: "{{ .Values.env.yapi.YAPI_ADMIN_ACCOUNT }}"
+          - name: YAPI_ADMIN_PASSWORD
+            value: "{{ .Values.env.yapi.YAPI_ADMIN_PASSWORD }}"
+          - name: YAPI_CLOSE_REGISTER
+            value: "{{ .Values.env.yapi.YAPI_CLOSE_REGISTER }}"
+          - name: YAPI_DB_SERVERNAME
+            value: "127.0.0.1"
+          - name: YAPI_DB_PORT
+            value: "27017"
+          - name: YAPI_DB_DATABASE
+            value: "yapi"
+          - name: YAPI_DB_USER
+            value: "{{ .Values.env.mongodb.MONGO_INITDB_ROOT_USERNAME }}"
+          - name: YAPI_DB_PASS
+            value: "{{ .Values.env.mongodb.MONGO_INITDB_ROOT_PASSWORD }}"
+          {{- if .Values.env.mongodb.MONGO_INITDB_ROOT_PASSWORD }}
+          - name: YAPI_DB_AUTH_SOURCE
+            value: "admin"
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

@@ -1,0 +1,36 @@
+﻿{{- if or (eq .Values.service.type "ClusterIP") (eq .Values.service.type "NodePort") }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "yapi.fullname" . }}-svc
+  labels:
+{{ include "yapi.labels" . | indent 4 }}
+{{- if eq .Values.service.type "ClusterIP" }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 3000
+      protocol: TCP
+      name: yapi
+    - port: 27017
+      targetPort: 27017
+      protocol: TCP
+      name: mogo
+{{- end }}
+{{- if eq .Values.service.type "NodePort" }}
+spec:
+  type: NodePort
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 3000
+      protocol: TCP
+      name: yapi
+      {{- if .Values.service.NodePort }}
+      nodePort: {{ .Values.service.NodePort }}
+      {{- end }}
+{{- end }}
+  selector:
+{{ include "yapi.labels" . | indent 4 }}
+{{- end }}

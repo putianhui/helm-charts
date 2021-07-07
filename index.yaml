@@ -1,0 +1,18 @@
+apiVersion: v1
+entries:
+  yapi:
+  - annotations:
+      app.kubesphere.io/category: Database & Cache
+    apiVersion: v1
+    appVersion: 1.9.2
+    created: "2021-07-07T18:38:09.915819+08:00"
+    description: yapi-1.9.2 & mogodb 4.2.1
+    digest: 4765d628ec9437b5914ab9265f0db2e2d9780d4342426838fac4c957b639916e
+    maintainers:
+    - email: 614214568@qq.com
+      name: putianhui
+    name: yapi
+    urls:
+    - https://github.com/putianhui/helm-charts/yapi-0.0.1.tgz
+    version: 0.0.1
+generated: "2021-07-07T18:38:09.912083+08:00"

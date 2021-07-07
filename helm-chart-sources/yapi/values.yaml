@@ -1,0 +1,74 @@
+﻿image:
+  # 指定镜像仓库地址
+  # yapi的容器镜像参考：https://github.com/fjc0k/docker-YApi
+  repository: jayfong/yapi
+  # 指定镜像的版本号
+  tag: latest
+  # 镜像拉取策略(IfNotPresent、Always、Never)
+  pullPolicy: IfNotPresent
+  # 指定镜像拉取secret，私用镜像时使用
+  imagePullSecrets: []
+  # - name: imagesecret
+
+
+service:
+  # service暴露的类型("ClusterIP、NodePort")
+  type: ClusterIP
+  # yapi镜像的端口号，默认3000
+  port: 3000
+  # 当type为NodePort时指定Node的端口号(30000-32767)，为空时表示随机端口
+  NodePort: ""
+
+
+# 持久化存储相关
+persistence:
+  # 是否开启数据持久化，为true时通过配置的storageClassName自动创建pv和pvc，为false时使用emptyDir
+  enabled: true
+  # 使用的存储类名称,生产环境使用“alicloud-disk-efficiency-retain”存储类，>当chart删除后数据保留，alicloud-disk-efficiency为chart删除数据一同删除
+  storageClassName: "alicloud-disk-efficiency"
+  # pvc访问模式("ReadWriteOnce、ReadOnlyMany 或 ReadWriteMany")
+  accessMode: ReadWriteOnce
+  # 存储卷的大小，阿里云最小云盘是20Gi，否则无法创建。
+  size: 20Gi
+
+
+env:
+  mongodb:
+    # 设置内建mogodb的账号和密码
+    MONGO_INITDB_ROOT_USERNAME: "root"
+    MONGO_INITDB_ROOT_PASSWORD: "root"
+  yapi:
+    # 设置yapi的管理员账号和密码
+    YAPI_ADMIN_ACCOUNT: "admin@putianhui.cn"
+    YAPI_ADMIN_PASSWORD: "admin"
+    YAPI_CLOSE_REGISTER: true
+
+
+# pod资源限制相关
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "200m"
+    memory: "500Mi"
+
+
+# 指定节点调度相关
+nodeSelector: {}
+  # disktype: ssd
+  # kubernetes.io/os: linux
+
+
+# 污点容忍相关标签
+tolerations: []
+# - key: "key1"
+#   operator: "Exists"
+#   effect: "NoSchedule"
+
+# 亲和性相关
+affinity: {}

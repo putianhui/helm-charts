@@ -1,0 +1,10 @@
+﻿annotations:
+  app.kubesphere.io/category: Database & Cache
+apiVersion: v1
+appVersion: 1.9.2
+description: yapi-1.9.2 & mogodb 4.2.1
+maintainers:
+- email: 614214568@qq.com
+  name: putianhui
+name: yapi
+version: 0.0.1
